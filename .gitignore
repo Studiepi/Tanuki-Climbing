@@ -1,0 +1,29 @@
+# Python/Django
+*.pyc
+__pycache__/
+*.log
+*.sqlite3
+.env                # Environment variables file
+.env.local
+
+# Django specific
+Tanuki-Climbing/Backend/static/
+media/              # User-uploaded files
+db.sqlite3          # Local SQLite database (if used)
+
+# Firebase
+Tanuki-Climbing/Backend/config/firebase-adminsdk.json
+
+# Node/React
+node_modules/       # Node dependencies
+build/              # Build directory
+*.env               # Any other env files for React
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Git-specific
+.git
