@@ -1,0 +1,21 @@
+# Django-related dependencies
+django>=4.0,<5.0
+djangorestframework
+
+# Firebase dependencies
+firebase-admin
+google-auth
+
+# Additional utilities
+python-decouple  # for environment variables management
+
+# Database and ORM (optional if using Firebase as primary database)
+psycopg2-binary  # PostgreSQL, remove if not needed
+
+# Frontend dependencies (if needed for SSR or testing within Django)
+django-cors-headers  # Enable CORS for frontend-backend communication
+
+# For testing
+pytest
+pytest-django
+pytest-cov
