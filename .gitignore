@@ -15,7 +15,9 @@ db.sqlite3          # Local SQLite database (if used)
 Tanuki-Climbing/Backend/config/firebase-adminsdk.json
 
 # Node/React
-node_modules/       # Node dependencies
+Tanuki-Climbing/Frontend/node_modules/       # Node dependencies
+node_modules/
+Frontend/node_modules/
 build/              # Build directory
 *.env               # Any other env files for React
 
