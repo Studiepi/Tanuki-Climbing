@@ -10,36 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
-import environ
 import firebase_admin
 from firebase_admin import credentials
 
-# Initialize environment variables
-env = environ.Env()
-environ.Env.read_env()  # This reads the .env file
-
-# Load Firebase settings from environment variables
-FIREBASE_DATABASE_URL = env("FIREBASE_DATABASE_URL")
-FIREBASE_PROJECT_ID = env("FIREBASE_PROJECT_ID")
-FIREBASE_PRIVATE_KEY_ID = env("FIREBASE_PRIVATE_KEY_ID")
-FIREBASE_CLIENT_EMAIL = env("FIREBASE_CLIENT_EMAIL")
-FIREBASE_CLIENT_ID = env("FIREBASE_CLIENT_ID")
-
-# Initialize Firebase with the loaded credentials
-cred = credentials.Certificate({
-    "type": "service_account",
-    "project_id": FIREBASE_PROJECT_ID,
-    "private_key_id": FIREBASE_PRIVATE_KEY_ID,
-    "client_email": FIREBASE_CLIENT_EMAIL,
-    "client_id": FIREBASE_CLIENT_ID,
-    # Continue with other necessary key-value pairs from the JSON
-})
-firebase_admin.initialize_app(cred)
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+FIREBASE_DATABASE_URL = os.environ.get("FIREBASE_DATABASE_URL")
+FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
+FIREBASE_PRIVATE_KEY_ID = os.environ.get("FIREBASE_PRIVATE_KEY_ID")
+FIREBASE_CLIENT_EMAIL = os.environ.get("FIREBASE_CLIENT_EMAIL")
+FIREBASE_CLIENT_ID = os.environ.get("FIREBASE_CLIENT_ID")
+FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'firebase-adminsdk.json')
+
+cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+firebase_admin.initialize_app(cred)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -62,6 +48,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+INSTALLED_APPS += [
+    'Core',
 ]
 
 MIDDLEWARE = [

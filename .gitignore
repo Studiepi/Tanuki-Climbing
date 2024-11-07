@@ -5,6 +5,7 @@ __pycache__/
 *.sqlite3
 .env                # Environment variables file
 .env.local
+Tanuki-Climbing/Backend/.env
 
 # Django specific
 Tanuki-Climbing/Backend/static/
