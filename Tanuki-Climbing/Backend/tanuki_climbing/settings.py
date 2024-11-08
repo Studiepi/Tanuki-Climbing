@@ -9,33 +9,37 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
 import os
 from pathlib import Path
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, initialize_app
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-FIREBASE_DATABASE_URL = os.environ.get("FIREBASE_DATABASE_URL")
-FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
-FIREBASE_PRIVATE_KEY_ID = os.environ.get("FIREBASE_PRIVATE_KEY_ID")
-FIREBASE_CLIENT_EMAIL = os.environ.get("FIREBASE_CLIENT_EMAIL")
-FIREBASE_CLIENT_ID = os.environ.get("FIREBASE_CLIENT_ID")
+# Initialize environment variables
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Load Firebase settings from environment variables
+FIREBASE_DATABASE_URL = env("FIREBASE_DATABASE_URL")
+FIREBASE_PROJECT_ID = env("FIREBASE_PROJECT_ID")
+FIREBASE_PRIVATE_KEY_ID = env("FIREBASE_PRIVATE_KEY_ID")
+FIREBASE_CLIENT_EMAIL = env("FIREBASE_CLIENT_EMAIL")
+FIREBASE_CLIENT_ID = env("FIREBASE_CLIENT_ID")
+
+# Firebase credentials path
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'config', 'firebase-adminsdk.json')
 
+# Initialize Firebase with the credentials file and Database URL
 cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
-firebase_admin.initialize_app(cred)
+firebase_app = initialize_app(cred, {
+    'databaseURL': FIREBASE_DATABASE_URL  # Ensure the Database URL is included
+})
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# Django settings
 SECRET_KEY = "django-insecure-0cbs(x@k3_311knh(p)n7!(2tu$00huffx-wsiaihv!-r3n6ai"
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = []
 
 
@@ -51,7 +55,7 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
-    'Core',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -68,15 +72,15 @@ ROOT_URLCONF = "tanuki_climbing.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
