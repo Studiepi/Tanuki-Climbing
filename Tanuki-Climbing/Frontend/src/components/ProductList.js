@@ -1,40 +1,48 @@
-// src/components/ProductList.js
-import { useEffect, useState } from "react";
-import { db } from "../firebase";
+import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { useCart } from "../CartContext";
+import { db } from "../firebase";
+import { Link } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
-  const { addToCart } = useCart();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const productsCollection = collection(db, "products");
-      const productSnapshot = await getDocs(productsCollection);
-      const productList = productSnapshot.docs.map(doc => ({
+  const fetchProducts = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const productList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setProducts(productList);
-    };
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, []);
 
   return (
     <div>
-      {products.map(product => (
-        <div key={product.id}>
-          <h2>{product.name}</h2>
-          <p>{product.description}</p>
-          <img src={product.imageURL} alt={product.name} />
-          <p>Price: ${product.price}</p>
-          <button onClick={() => addToCart(product)}>Add to Cart</button>
-        </div>
-      ))}
+      <h2>Product Listings</h2>
+      <div className="product-grid">
+        {products.length > 0 ? (
+          products.map((product) => (
+            <div key={product.id} className="product-card">
+              <h3>{product.name}</h3>
+              <p>{product.description}</p>
+              <p>Price: ${product.price}</p>
+              <Link to={`/product/${product.id}`}>View Details</Link>
+            </div>
+          ))
+        ) : (
+          <p>No products available</p>
+        )}
+      </div>
     </div>
   );
 };
 
 export default ProductList;
+

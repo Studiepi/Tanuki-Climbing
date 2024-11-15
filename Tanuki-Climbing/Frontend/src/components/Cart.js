@@ -1,30 +1,27 @@
-// src/components/Cart.js
-import React from "react";
-import { useCart } from "../CartContext";
+import React, { useContext } from "react";
+import { CartContext } from "../CartContext";
 
 const Cart = () => {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { cartItems, removeFromCart } = useContext(CartContext);
 
   return (
     <div>
       <h2>Your Cart</h2>
-      {cart.length === 0 ? (
-        <p>Your cart is empty.</p>
+      {cartItems.length > 0 ? (
+        cartItems.map((item) => (
+          <div key={item.id}>
+            <h3>{item.name}</h3>
+            <p>Price: ${item.price}</p>
+            <button onClick={() => removeFromCart(item.id)}>Remove</button>
+          </div>
+        ))
       ) : (
-        <div>
-          {cart.map(item => (
-            <div key={item.id}>
-              <h3>{item.name}</h3>
-              <p>Price: ${item.price} x {item.quantity}</p>
-              <button onClick={() => removeFromCart(item.id)}>Remove</button>
-            </div>
-          ))}
-          <button onClick={clearCart}>Clear Cart</button>
-        </div>
+        <p>Your cart is empty</p>
       )}
     </div>
   );
 };
 
 export default Cart;
+
 
