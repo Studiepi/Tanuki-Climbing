@@ -1,48 +1,60 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { db } from "../firebase"; // Ensure firebase.js exports the `db` instance
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
-import { Link } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
-
-  const fetchProducts = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      const productList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setProducts(productList);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Products"));
+        const productsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProducts();
   }, []);
 
+  if (loading) return <p>Loading...</p>;
+
   return (
-    <div>
-      <h2>Product Listings</h2>
-      <div className="product-grid">
-        {products.length > 0 ? (
-          products.map((product) => (
-            <div key={product.id} className="product-card">
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p>Price: ${product.price}</p>
-              <Link to={`/product/${product.id}`}>View Details</Link>
+    <div className="container">
+      <div className="row">
+        {products.map((product) => (
+          <div key={product.id} className="col-md-4 mb-4">
+            <div
+                className="card"
+                style={{ width: "18rem", cursor: "pointer" }}
+                onClick={() => (window.location.href = `/product/${product.id}`)}
+              >
+              <img
+                src={product.imageUrl}
+                className="card-img-top"
+                alt={product.name}
+              />
+              <div className="card-body">
+                <h5 className="card-title">{product.name}</h5>
+                <p className="card-text">{product.description}</p>
+                <p className="card-text">
+                  <strong>R{product.price.toFixed(2)}</strong>
+                </p>
+              </div>
             </div>
-          ))
-        ) : (
-          <p>No products available</p>
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
 export default ProductList;
-
