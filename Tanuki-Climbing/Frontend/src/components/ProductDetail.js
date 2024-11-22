@@ -1,14 +1,15 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom"; // Import useNavigate and Link
 import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { CartContext } from "../CartContext"; // Import the Cart Context
+import { CartContext } from "../CartContext"; // Import Cart Context
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate(); // Initialize useNavigate
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useContext(CartContext); // Access the addToCart function
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -31,6 +32,11 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
+  const handleAddToCart = () => {
+    addToCart(product); // Add product to the cart
+    navigate("/cart"); // Redirect to the cart page
+  };
+
   if (loading) return <p>Loading...</p>;
   if (!product) return <p>Product not found!</p>;
 
@@ -47,14 +53,20 @@ const ProductDetail = () => {
       </p>
       <button
         className="btn btn-primary"
-        onClick={() => addToCart(product)} // Ensure this is correctly passing the product
+        onClick={handleAddToCart} // Use the new handler
       >
         Add to Cart
-      </button> 
-
+      </button>
+      <div className="mt-3">
+        <Link to="/cart" className="btn btn-secondary me-2">
+          View Cart
+        </Link>
+        <Link to="/" className="btn btn-secondary">
+          Back to Products
+        </Link>
+      </div>
     </div>
   );
 };
 
 export default ProductDetail;
-

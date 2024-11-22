@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase"; // Ensure firebase.js exports the `db` instance
 import { collection, getDocs } from "firebase/firestore";
+import { Link } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -29,6 +30,9 @@ const ProductList = () => {
 
   return (
     <div className="container">
+      <Link to="/cart" className="btn btn-primary mb-3">
+        View Cart
+      </Link>
       <div className="row">
         {products.map((product) => (
           <div key={product.id} className="col-md-4 mb-4">
