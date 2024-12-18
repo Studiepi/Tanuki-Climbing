@@ -1,10 +1,12 @@
 import React, { useContext } from "react";
 import { CartContext } from "../CartContext";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 const Cart = () => {
   const { cartItems, removeFromCart, clearCart, increaseQuantity, decreaseQuantity } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const calculateTotal = () =>
     cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -59,6 +61,12 @@ const Cart = () => {
       <h3 className="mt-3">Total: R{calculateTotal().toFixed(2)}</h3>
       <button className="btn btn-secondary mt-3" onClick={clearCart}>
         Clear Cart
+      </button>
+      <button
+        className="btn btn-success mt-3"
+        onClick={() => navigate("/checkout")}
+      >
+        Proceed to Checkout
       </button>
     </div>
   );

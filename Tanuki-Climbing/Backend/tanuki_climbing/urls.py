@@ -17,8 +17,10 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),  # Include core app's URLs
+    path("submit-order/", views.submit_order, name="submit_order"),
 ]

@@ -1,24 +1,41 @@
-# core/views.py
-from django.shortcuts import render
+from django.http import JsonResponse
 from firebase_admin import firestore
-import firebase_admin
+from django.views.decorators.csrf import csrf_exempt
+import json
 
-# Initialize Firebase Firestore
+# Reference to Firestore
 db = firestore.client()
 
-def firebase_test(request):
-    # Fetch a test collection or document from Firestore
-    test_doc = db.collection('testCollection').document('testDocument').get()
-    
-    # Check if the document exists
-    if test_doc.exists:
-        data = test_doc.to_dict()
+@csrf_exempt
+def submit_order(request):
+    if request.method == "POST":
+        try:
+            # Parse the request body
+            body = json.loads(request.body)
+
+            # Extract order details
+            user_details = body.get("userDetails")
+            cart_items = body.get("cartItems")
+            total_price = body.get("totalPrice")
+
+            if not user_details or not cart_items or total_price is None:
+                return JsonResponse({"success": False, "message": "Invalid data."}, status=400)
+
+            # Add order to Firestore
+            order_data = {
+                "userDetails": user_details,
+                "cartItems": cart_items,
+                "totalPrice": total_price,
+                "createdAt": firestore.SERVER_TIMESTAMP,
+            }
+
+            # Save to Firestore
+            orders_ref = db.collection("orders")
+            new_order = orders_ref.add(order_data)
+
+            return JsonResponse({"success": True, "orderId": new_order[1].id}, status=201)
+
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
     else:
-        data = {"message": "Test document not found"}
-    
-    return render(request, 'core/firebase_test.html', {"data": data})
-
-# Index view function
-def index(request):
-    return render(request, 'core/index.html')
-
+        return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
