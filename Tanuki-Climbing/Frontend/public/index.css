@@ -29,3 +29,8 @@ body {
     background-color: #6c757d;
   }
   
+  .container {
+    display: block;
+    padding: 20px;
+    margin-top: 20px;
+  }

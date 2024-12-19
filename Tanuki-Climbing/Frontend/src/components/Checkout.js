@@ -1,55 +1,93 @@
 import React, { useContext, useState } from "react";
 import { CartContext } from "../CartContext";
 import { useNavigate } from "react-router-dom";
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Checkout = () => {
   const { cartItems, clearCart } = useContext(CartContext);
-  const [userName, setUserName] = useState(""); // Collect user's name
-  const [email, setEmail] = useState(""); // Collect user's email
-  const [address, setAddress] = useState(""); // Collect user's address
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Calculate the total amount
   const totalAmount = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
-  // Function to handle checkout submission
   const handleCheckout = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/api/process-order/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userName, // Send user's name
-          email, // Send user's email
-          address, // Send user's address
-          cartItems,
-          totalAmount,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert(data.message);
-        clearCart(); // Clear the cart after successful order
-        navigate("/thank-you"); // Redirect to Thank You page
-      } else {
-        alert(data.error);
-      }
-    } catch (error) {
-      console.error("Error during checkout:", error);
-      alert("There was an issue processing your order. Please try again.");
+    setIsLoading(true);
+    
+    // Validate form fields
+    if (!userName || !email || !address) {
+      alert("Please fill in all fields");
+      setIsLoading(false);
+      return;
     }
+
+    // Validate cart
+    if (!cartItems || cartItems.length === 0) {
+      alert("Your cart is empty");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Starting checkout process...'); // Debug log
+
+      // Log the data being sent
+      const orderData = {
+        userDetails: {
+          name: userName,
+          email: email,
+          address: address,
+        },
+        cartItems: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalPrice: totalAmount,
+        createdAt: serverTimestamp()
+      };
+
+      console.log('Order data:', orderData); // Debug log
+
+      // Check if Firestore is initialized
+      if (!db) {
+        throw new Error('Firestore is not initialized');
+      }
+
+      // Add the document to 'orders' collection
+      const ordersRef = collection(db, 'orders');
+      const docRef = await addDoc(ordersRef, orderData);
+
+      console.log('Order submitted successfully:', docRef.id); // Debug log
+
+      // Handle successful order
+      navigate("/thank-you");
+      alert('Order placed successfully!');  
+      clearCart();
+
+    } catch (error) {
+      console.error("Detailed error during checkout:", error); // Detailed error log
+      alert(`Error processing order: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelOrder = () => {
+    navigate("/cart");
   };
 
   return (
     <div className="container">
       <h1>Checkout</h1>
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <div className="mb-3">
           <label htmlFor="userName" className="form-label">
             Name
@@ -93,8 +131,15 @@ const Checkout = () => {
 
       <h3>Total: ${totalAmount.toFixed(2)}</h3>
 
-      <button className="btn btn-primary mt-3" onClick={handleCheckout}>
-        Place Order
+      <button 
+        className="btn btn-primary mt-3" 
+        onClick={handleCheckout}
+        disabled={isLoading || !userName || !email || !address}
+      >
+        {isLoading ? 'Processing...' : 'Place Order'}
+      </button>
+      <button className="btn btn-secondary" onClick={handleCancelOrder}>
+        Back to Cart
       </button>
     </div>
   );
