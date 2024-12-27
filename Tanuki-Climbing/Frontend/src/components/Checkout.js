@@ -65,11 +65,11 @@ const Checkout = () => {
       const ordersRef = collection(db, 'orders');
       const docRef = await addDoc(ordersRef, orderData);
 
-      console.log('Order submitted successfully:', docRef.id); // Debug log
+      console.log('Order submitted successfully, Thank you!!!:', docRef.id); // Debug log
 
       // Handle successful order
-      navigate("/thank-you");
-      alert('Order placed successfully!');  
+      navigate("/");
+      alert('Order placed successfully, Thank You!!!');  
       clearCart();
 
     } catch (error) {
